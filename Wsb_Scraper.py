@@ -6,7 +6,9 @@ from dateutil.parser import parse
 import requests
 from selenium.webdriver import Safari
 
-yesterday = date.today() - timedelta(days=1)
+import csv
+
+yesterday = date.today() - timedelta(days=2) # Just a workaround so I can get this code to run on a Sunday
 
 with Safari() as driver:
 
@@ -35,22 +37,23 @@ with open('Stocks_List.txt', 'r') as document:
     stocks = document.readlines() # Read every line of the Stocks_List document
     stocks_list = [] # Initialise a list called stocks_list (will store the tickers from the txt file)
     for a in stocks:
-        a = a.replace('\n','')
-        stocks_list.append(a) # Add the ticker to the end of the stocks_list
+        a = a.replace('\n',' ')
+        stocks_list.append(' '+a) # Add the ticker to the end of the stocks_list
 
 
 import numpy as np
 
-orig_list = np.array(raw_comment_list['data'])
-comment_list = ",".join(orig_list[0:1000])
+orig_list = np.array(raw_comment_list['data']) # Creates a numpy array from the raw comment list we collected above
+comment_list = ",".join(orig_list[0:1000]) # Creates a list with which we can query PushShift
 
 
 def get_comments(comment_list):
 
-    html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids{comment_list}&fields=body&size=1000')
+    html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids={comment_list}&fields=body&size=1000')
     newcomments = html.json()
     return newcomments
 
+comments = dict()
 
 from collections import Counter
 stock_dict = Counter()
@@ -59,6 +62,7 @@ def get_stock_list(newcomments,stocks_list):
         for ticker in stocks_list:
             if ticker in a['body']:
                 stock_dict[ticker] += 1
+                comments[a['body']] = ticker
 
 orig_list = np.array(raw_comment_list['data'])
 remove = slice(0,1000)
@@ -73,4 +77,12 @@ while i < len(cleaned):
 
 stock = dict(stock_dict)
 
-print(stock)
+with open('Comments.txt', 'w') as w:
+    w.write(str(comments))
+
+data = list(zip((stock.keys()), (stock.values())))
+with open('stock.csv', 'w') as w:
+    writer = csv.writer(w, lineterminator='\n')
+    writer.writerow(['Stock','Number of Mentions'])
+    for a in data:
+        writer.writerow(a)
