@@ -31,7 +31,6 @@ with Safari() as driver:
 
     raw_comment_list = html.json()
 
-"""All the code above this point goes to the subreddit and gets the ID of every comment in the main daily thread of the subreddit. At the time of writing this code I'm not sure how many tickers this will actually be able to find because of the Black Swan event that is GME"""
 
 with open('Stocks_List.txt', 'r') as document:
     stocks = document.readlines() # Read every line of the Stocks_List document
