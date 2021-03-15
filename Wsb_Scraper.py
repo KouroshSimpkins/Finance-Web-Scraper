@@ -8,13 +8,20 @@ from selenium.webdriver import Safari
 
 import csv
 
-yesterday = date.today() - timedelta(days=2) # Just a workaround so I can get this code to run on a Sunday
+# Setting up date stuff
+today = date.today()
+yesterday = today - timedelta(days=1)
+day_index = today.weekday()
 
 with Safari() as driver:
 
-    URL = "https://www.reddit.com/r/wallstreetbets/search/?q=%22Daily%20Discussion%20Thread%22%20flair%3A%22Daily%20Discussion%22&restrict_sr=1&sort=new"
+    Weekday_URL = "https://www.reddit.com/r/wallstreetbets/search/?q=%22Daily%20Discussion%20Thread%22%20flair%3A%22Daily%20Discussion%22&restrict_sr=1&sort=new"
+    Weekend_URL = "https://www.reddit.com/r/wallstreetbets/search/?q=%22Weekend%20Discussion%22%20flair%3A%22Weekend%20Discussion%22&restrict_sr=1&sort=new"
 
-    driver.get(URL)
+    if day_index in {1,2,3,4,5}:
+        driver.get(Weekday_URL)
+    elif day_index in {0,6}:
+        driver.get(Weekend_URL)
 
     links = driver.find_elements_by_xpath('//*[@class="_eYtD2XCVieq6emjKBH3m"]')
 
@@ -24,6 +31,19 @@ with Safari() as driver:
             parsed = parse(date)
             if parse(str(yesterday)) == parsed:
                 link = a.find_element_by_xpath('../..').get_attribute('href')
+        
+        if a.text.startswith('Weekend'):
+            weekend_date = a.text.split(' ')
+            parsed_date = weekend_date[-3] + ' ' + weekend_date[-2].split("-")[1] + weekend_date[-1]
+            parsed = parse(parsed_date)
+            saturday = weekend_date[-3] + ' ' + str(int(weekend_date[-2].split("-")[1].replace(',',''))-1) +' ' + weekend_date[-1]
+
+            if parse(str(yesterday)) == parsed:
+                link = a.find_element_by_xpath('../..').get_attribute('href')
+            
+            elif parse(str(yesterday)) == parse(str(saturday)):
+                link = a.find_element_by_xpath('../..').get_attribute('href')
+
 
     stock_link = link.split('/')[-3]
 
@@ -47,7 +67,8 @@ comment_list = ",".join(orig_list[0:1000]) # Creates a list with which we can qu
 
 
 def get_comments(comment_list):
-
+    # make an api request to pushshift so that we can read the data in the comments.
+    # Pushshift limits the number of comments that can be pulled, so we limit it to asking for 1000 comments at a time.
     html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids={comment_list}&fields=body&size=1000')
     newcomments = html.json()
     return newcomments
@@ -76,11 +97,13 @@ while i < len(cleaned):
 
 stock = dict(stock_dict)
 
-with open('Comments.txt', 'w') as w:
+Comment_Data = "Comments_Out/Comments"+str(date.today())+".txt"
+with open(Comment_Data, 'w') as w:
     w.write(str(comments))
 
 data = list(zip((stock.keys()), (stock.values())))
-with open('stock.csv', 'w') as w:
+Stocks_Data = "Mentions_Out/WSB_Mentions"+str(date.today())+".csv"
+with open(Stocks_Data, 'w') as w:
     writer = csv.writer(w, lineterminator='\n')
     writer.writerow(['Stock','Number of Mentions'])
     for a in data:
