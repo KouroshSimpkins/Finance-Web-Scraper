@@ -6,8 +6,6 @@ from yahoofinancials import YahooFinancials
 
 import Data_Read_Write
 
-import csv
-
 List_Of_Stocks = []
 
 Data_Read_Write.Reader("stock.csv", List_Of_Stocks, 'Stock')
