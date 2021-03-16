@@ -63,13 +63,13 @@ with open('Stocks_List.txt', 'r') as document:
 import numpy as np
 
 orig_list = np.array(raw_comment_list['data']) # Creates a numpy array from the raw comment list we collected above
-comment_list = ",".join(orig_list[0:1000]) # Creates a list with which we can query PushShift
+comment_list = ",".join(orig_list[0:500]) # Creates a list with which we can query PushShift
 
 
 def get_comments(comment_list):
     # make an api request to pushshift so that we can read the data in the comments.
     # Pushshift limits the number of comments that can be pulled, so we limit it to asking for 1000 comments at a time.
-    html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids={comment_list}&fields=body&size=1000')
+    html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids={comment_list}&fields=body&size=500')
     newcomments = html.json()
     return newcomments
 
@@ -85,24 +85,24 @@ def get_stock_list(newcomments,stocks_list):
                 comments[a['body']] = ticker
 
 orig_list = np.array(raw_comment_list['data'])
-remove = slice(0,1000)
+remove = slice(0,500)
 cleaned = np.delete(orig_list, remove)
 i = 0
 while i < len(cleaned):
     print(len(cleaned))
     cleaned = np.delete(cleaned, remove)
-    new_comment_list = ",".join(cleaned[0:1000])
+    new_comment_list = ",".join(cleaned[0:500])
     newcomments = get_comments(new_comment_list)
     get_stock_list(newcomments, stocks_list)
 
 stock = dict(stock_dict)
 
-Comment_Data = "Comments_Out/Comments"+str(date.today())+".txt"
+Comment_Data = "Comments_Out/Comments"+str(today)+".txt"
 with open(Comment_Data, 'w') as w:
     w.write(str(comments))
 
 data = list(zip((stock.keys()), (stock.values())))
-Stocks_Data = "Mentions_Out/WSB_Mentions"+str(date.today())+".csv"
+Stocks_Data = "Mentions_Out/WSB_Mentions"+str(today)+".csv"
 with open(Stocks_Data, 'w') as w:
     writer = csv.writer(w, lineterminator='\n')
     writer.writerow(['Stock','Number of Mentions'])
