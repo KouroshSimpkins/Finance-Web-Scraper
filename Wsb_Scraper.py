@@ -35,18 +35,16 @@ with Safari() as driver:
         if a.text.startswith('Weekend'):
             weekend_date = a.text.split(' ')
             parsed_date = weekend_date[-3] + ' ' + weekend_date[-2] + weekend_date[-1] # This parsed date should be the Friday at the start of the weekend
+            parsed = parse(parsed_date)
 
             if day_index == 6: # If the code is running on a Sunday
-                parsed = parse(parsed_date)
                 friday = today - timedelta(days=2)
-                if parse(str(friday)) == parsed:
-                    link = a.find_element_by_xpath('../..').get_attribute('href')
 
             elif day_index == 0: # If the code is running on a Monday
-                parsed = parse(parsed_date)
                 friday = today - timedelta(days=3)
-                if parse(str(friday)) == parsed:
-                    link = a.find_element_by_xpath('../..').get_attribute('href')
+
+        if parse(str(friday)) == parsed:
+            link = a.find_element_by_xpath('../..').get_attribute('href')
 
 
     stock_link = link.split('/')[-3]
