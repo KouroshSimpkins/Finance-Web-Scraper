@@ -9,7 +9,7 @@ from selenium.webdriver import Safari
 import csv
 
 # Setting up date stuff
-today = date.today()
+today =  date.today()
 yesterday = today - timedelta(days=1)
 day_index = today.weekday()
 
@@ -34,15 +34,19 @@ with Safari() as driver:
         
         if a.text.startswith('Weekend'):
             weekend_date = a.text.split(' ')
-            parsed_date = weekend_date[-3] + ' ' + weekend_date[-2].split("-")[1] + weekend_date[-1]
-            parsed = parse(parsed_date)
-            saturday = weekend_date[-3] + ' ' + str(int(weekend_date[-2].split("-")[1].replace(',',''))-1) +' ' + weekend_date[-1]
+            parsed_date = weekend_date[-3] + ' ' + weekend_date[-2] + weekend_date[-1] # This parsed date should be the Friday at the start of the weekend
 
-            if parse(str(yesterday)) == parsed:
-                link = a.find_element_by_xpath('../..').get_attribute('href')
-            
-            elif parse(str(yesterday)) == parse(str(saturday)):
-                link = a.find_element_by_xpath('../..').get_attribute('href')
+            if day_index == 6: # If the code is running on a Sunday
+                parsed = parse(parsed_date)
+                friday = today - timedelta(days=2)
+                if parse(str(friday)) == parsed:
+                    link = a.find_element_by_xpath('../..').get_attribute('href')
+
+            elif day_index == 0: # If the code is running on a Monday
+                parsed = parse(parsed_date)
+                friday = today - timedelta(days=3)
+                if parse(str(friday)) == parsed:
+                    link = a.find_element_by_xpath('../..').get_attribute('href')
 
 
     stock_link = link.split('/')[-3]
