@@ -43,8 +43,8 @@ with Safari() as driver:
             elif day_index == 0: # If the code is running on a Monday
                 friday = today - timedelta(days=3)
 
-        if parse(str(friday)) == parsed:
-            link = a.find_element_by_xpath('../..').get_attribute('href')
+            if parse(str(friday)) == parsed:
+                link = a.find_element_by_xpath('../..').get_attribute('href')
 
 
     stock_link = link.split('/')[-3]
