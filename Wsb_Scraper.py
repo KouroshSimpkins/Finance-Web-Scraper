@@ -2,6 +2,7 @@
 
 from datetime import date,timedelta
 from dateutil.parser import parse
+import time
 
 import requests
 from selenium.webdriver import Safari
@@ -43,8 +44,8 @@ with Safari() as driver:
             elif day_index == 0: # If the code is running on a Monday
                 friday = today - timedelta(days=3)
 
-        if parse(str(friday)) == parsed:
-            link = a.find_element_by_xpath('../..').get_attribute('href')
+            if parse(str(friday)) == parsed:
+                link = a.find_element_by_xpath('../..').get_attribute('href')
 
 
     stock_link = link.split('/')[-3]
@@ -58,14 +59,14 @@ with open('Stocks_List.txt', 'r') as document:
     stocks = document.readlines() # Read every line of the Stocks_List document
     stocks_list = [] # Initialise a list called stocks_list (will store the tickers from the txt file)
     for a in stocks:
-        a = a.replace('\n',' ')
-        stocks_list.append(' '+a) # Add the ticker to the end of the stocks_list
+        a = a.replace('\n','')
+        stocks_list.append(a) # Add the ticker to the end of the stocks_list
 
 
 import numpy as np
 
 orig_list = np.array(raw_comment_list['data']) # Creates a numpy array from the raw comment list we collected above
-comment_list = ",".join(orig_list[0:500]) # Creates a list with which we can query PushShift
+comment_list = ",".join(orig_list[0:500]) # Creates a list with which we can use to query PushShift
 
 
 def get_comments(comment_list):
@@ -79,12 +80,30 @@ comments = dict()
 
 from collections import Counter
 stock_dict = Counter()
+
+# This is a mess of nested if statements, I'm sure there's a way to clean it up. Might add it as an issue.
+# This is genuinely a disgusting clusterfuck/bodge. But it works until I can figure out a more elegant method.
+
 def get_stock_list(newcomments,stocks_list):
-    for a in newcomments['data']:
-        for ticker in stocks_list:
-            if ticker in a['body']:
-                stock_dict[ticker] += 1
-                comments[a['body']] = ticker
+    Comment_Data = list(newcomments['data'])
+    for a in Comment_Data:
+        new = [] # I can't think of a better name for this damn variable I'm so very sorry
+        tickers_in_comment = str()
+        data = a
+        for key, value in data.items():
+            new = value.split()
+            for word in new:
+                for ticker in stocks_list:
+                    if ticker == word:
+                        stock_dict[ticker] += 1
+                        tickers_in_comment += ticker + ' '
+            comments[a['body']] = tickers_in_comment
+
+""" for ticker in stocks_list:
+        if ticker in a['body']:
+            stock_dict[ticker] += 1
+            comments[a['body']] = ticker
+"""
 
 orig_list = np.array(raw_comment_list['data'])
 remove = slice(0,500)
@@ -99,13 +118,13 @@ while i < len(cleaned):
 
 stock = dict(stock_dict)
 
-Comment_Data = "Comments_Out/Comments"+str(today)+".txt"
-with open(Comment_Data, 'w') as w:
+Comment_Data_Out = "Comments_Out/Comments"+str(today)+".txt"
+with open(Comment_Data_Out, 'w') as w:
     w.write(str(comments))
 
 data = list(zip((stock.keys()), (stock.values())))
-Stocks_Data = "Mentions_Out/WSB_Mentions"+str(today)+".csv"
-with open(Stocks_Data, 'w') as w:
+Stocks_Data_Out = "Mentions_Out/WSB_Mentions"+str(today)+".csv"
+with open(Stocks_Data_Out, 'w') as w:
     writer = csv.writer(w, lineterminator='\n')
     writer.writerow(['Stock','Number of Mentions'])
     for a in data:
