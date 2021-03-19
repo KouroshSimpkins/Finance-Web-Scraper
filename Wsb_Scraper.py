@@ -70,7 +70,7 @@ comment_list = ",".join(orig_list[0:500]) # Creates a list with which we can que
 
 def get_comments(comment_list):
     # make an api request to pushshift so that we can read the data in the comments.
-    # Pushshift limits the number of comments that can be pulled, so we limit it to asking for 1000 comments at a time.
+    # Pushshift limits the number of comments that can be pulled, so we limit it to asking for 500 comments at a time.
     html = requests.get(f'https://api.pushshift.io/reddit/comment/search?ids={comment_list}&fields=body&size=500')
     newcomments = html.json()
     return newcomments
