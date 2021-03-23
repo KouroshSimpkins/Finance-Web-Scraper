@@ -32,7 +32,7 @@ with Safari() as driver:
             if parse(str(yesterday)) == parsed:
                 link = a.find_element_by_xpath('../..').get_attribute('href')
         
-        if a.text.startswith('Weekend'):
+        elif a.text.startswith('Weekend'):
             weekend_date = a.text.split(' ')
             parsed_date = weekend_date[-3] + ' ' + weekend_date[-2] + weekend_date[-1] # This parsed date should be the Friday at the start of the weekend
             parsed = parse(parsed_date)
