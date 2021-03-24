@@ -141,3 +141,4 @@ cython_debug/
 .vscode/*
 
 testfile.py
+praw.ini
