@@ -6,12 +6,18 @@ from dateutil.parser import parse
 import requests
 from selenium.webdriver import Safari
 
+import Get_Comments
+import praw
+
 import csv
 
 # Setting up date stuff
 today =  date.today()
 yesterday = today - timedelta(days=1)
 day_index = today.weekday()
+
+# Setup PRAW stuff
+reddit = praw.Reddit('bot1')
 
 with Safari() as driver:
 
@@ -49,9 +55,10 @@ with Safari() as driver:
 
     stock_link = link.split('/')[-3]
 
-    html = requests.get(f'https://api.pushshift.io/reddit/submission/comment_ids/{stock_link}')
+    html = Get_Comments.getAll(reddit, str(stock_link))
 
-    raw_comment_list = html.json()
+    print(html)
+#    raw_comment_list = html.json()
 
 
 with open('Stocks_List.txt', 'r') as document:
