@@ -12,6 +12,6 @@ def Reader(Input_File, Output_List, Column_Name):
 
 def Writer(Output_File, Input_List):
     with open(Output_File, "a") as output_file:
-    for Item in Input_List:
-        output_file.write(Item)
-        output_file.write('\n')
+        for Item in Input_List:
+            output_file.write(Item)
+            output_file.write('\n')
