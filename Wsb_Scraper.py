@@ -1,12 +1,13 @@
-"""this code will scrape the subreddit 'WallStreetBets' and will return a text file containing the most mentioned tickers on the subreddit."""
+"""this code will scrape the subreddit 'WallStreetBets' and will
+return a text file containing the most mentioned tickers on the subreddit."""
+
+import csv
 
 from datetime import date,timedelta
 from dateutil.parser import parse
 
 import requests
 from selenium.webdriver import Safari
-
-import csv
 
 # Setting up date stuff
 today =  date.today()
@@ -26,12 +27,12 @@ with Safari() as driver:
     links = driver.find_elements_by_xpath('//*[@class="_eYtD2XCVieq6emjKBH3m"]')
 
     for a in links:
-        if a.text.startswith('Daily Discussion Thread'):
+        if a.text.startswith('Daily Discussion'):
             date = "".join(a.text.split(' ')[-3:])
             parsed = parse(date)
             if parse(str(yesterday)) == parsed:
                 link = a.find_element_by_xpath('../..').get_attribute('href')
-        
+
         elif a.text.startswith('Weekend'):
             weekend_date = a.text.split(' ')
             parsed_date = weekend_date[-3] + ' ' + weekend_date[-2] + weekend_date[-1] # This parsed date should be the Friday at the start of the weekend
